@@ -1,7 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+
   loadGoals();
   updateGoalCount();
-  setReminderCheckInterval();
+  setGoalReminders();
 });
 
 // تحميل الأهداف من Local Storage
@@ -44,6 +48,7 @@ document.getElementById("goal-form").addEventListener("submit", function (e) {
   document.getElementById("reminder-time").value = '';
 
   updateGoalCount();
+  scheduleReminder(goal);
 });
 
 // حفظ الهدف
@@ -85,32 +90,15 @@ function updateGoalCount() {
   const incompleteGoals = goals.filter(goal => !goal.completed).length;
   document.getElementById("goal-number").textContent = incompleteGoals;
 }
+
+// إشعار المستخدم
 function notifyUser(message) {
   if (Notification.permission === "granted") {
     new Notification(message);
-  } else if (Notification.permission !== "denied") {
-    Notification.requestPermission().then(permission => {
-      if (permission === "granted") {
-        new Notification(message);
-      }
-    });
   }
 }
 
-
-// التذكير بالأهداف
-function setReminderCheckInterval() {
-  setInterval(() => {
-    const now = new Date();
-    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const goals = JSON.parse(localStorage.getItem("goals")) || [];
-    goals.forEach(goal => {
-      if (!goal.completed && goal.reminder === currentTime) {
-        notifyUser(`تذكير: حان وقت الهدف "${goal.title}"!`);
-      }
-    });
-  }, 60000); // تحقق كل دقيقة
-}
+// جدولة التذكيرات
 function scheduleReminder(goal) {
   const now = new Date();
   const [hours, minutes] = goal.reminder.split(':').map(Number);
@@ -120,12 +108,14 @@ function scheduleReminder(goal) {
   const delay = reminderTime - now;
   if (delay > 0) {
     setTimeout(() => {
-      notifyUser(`تذكير: حان وقت الهدف "${goal.title}"!`);
+      if (!goal.completed) {
+        notifyUser(`تذكير: حان وقت الهدف "${goal.title}"!`);
+      }
     }, delay);
   }
 }
 
-// جدولة لكل هدف
+// جدولة جميع التذكيرات
 function setGoalReminders() {
   const goals = JSON.parse(localStorage.getItem("goals")) || [];
   goals.forEach(goal => {
@@ -134,14 +124,3 @@ function setGoalReminders() {
     }
   });
 }
-
-
-const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-  }
-});
-
-
