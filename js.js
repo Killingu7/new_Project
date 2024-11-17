@@ -1,128 +1,235 @@
-document.addEventListener("DOMContentLoaded", () => {
-    loadGoals();
-    updateProgressBar();
-    setDailyReminder(20, 0); // التذكير يوميًا في الساعة 8 مساءً
-  });
-  
-  document.getElementById("goal-form").addEventListener("submit", addGoal);
-  
-  // تحميل الأهداف من Local Storage
-  function loadGoals() {
-    const goals = JSON.parse(localStorage.getItem("goals")) || [];
-    goals.forEach(goal => displayGoal(goal));
+/* التصميم الأساسي */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #2f2f2f, #1e1e1e);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    color: #f1f1f1;
   }
   
-  // عرض الهدف
-  function displayGoal(goal) {
-    const goalContainer = document.getElementById("goal-container");
-    
-    const goalElement = document.createElement("div");
-    goalElement.className = `goal-item ${goal.completed ? 'completed' : ''}`;
-    goalElement.innerHTML = `
-      <span>${goal.title}</span>
-      <div>
-        <button class="complete-btn" onclick="completeGoal('${goal.title}')">اكتمال</button>
-        <button class="delete-btn" onclick="deleteGoal('${goal.title}')">حذف</button>
-      </div>
-    `;
-  
-    goalContainer.appendChild(goalElement);
+  .background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, rgba(36, 36, 36, 0.9), rgba(20, 20, 20, 0.7));
+    z-index: -1;
   }
   
-  // إضافة هدف جديد
-  function addGoal(e) {
-    e.preventDefault();
-    
-    const title = document.getElementById("title").value;
-    if (title.trim() === "") return;
-  
-    const goal = { title, completed: false };
-    saveGoal(goal);
-    displayGoal(goal);
-    document.getElementById("title").value = "";
-  
-    updateProgressBar();
+  .content {
+    max-width: 450px;
+    width: 90%;
+    padding: 20px;
+    background-color: rgba(50, 50, 50, 0.85);
+    border-radius: 15px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    animation: fadeIn 1s ease;
   }
   
-  // حفظ الهدف في Local Storage
-  function saveGoal(goal) {
-    const goals = JSON.parse(localStorage.getItem("goals")) || [];
-    goals.push(goal);
-    localStorage.setItem("goals", JSON.stringify(goals));
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
-  // إكمال الهدف
-  function completeGoal(title) {
-    const goals = JSON.parse(localStorage.getItem("goals")) || [];
-    const updatedGoals = goals.map(goal => {
-      if (goal.title === title) {
-        goal.completed = !goal.completed;
-        showMotivationMessage();
-      }
-      return goal;
-    });
-    localStorage.setItem("goals", JSON.stringify(updatedGoals));
-    refreshGoals();
-    updateProgressBar();
+  h1 {
+    font-size: 28px;
+    color: #bfa07a;
+    margin-bottom: 20px;
   }
   
-  // حذف الهدف
-  function deleteGoal(title) {
-    const goals = JSON.parse(localStorage.getItem("goals")) || [];
-    const updatedGoals = goals.filter(goal => goal.title !== title);
-    localStorage.setItem("goals", JSON.stringify(updatedGoals));
-    refreshGoals();
-    updateProgressBar();
+  #goal-container {
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
   }
   
-  // تحديث شريط التقدم
-  function updateProgressBar() {
-    const goals = JSON.parse(localStorage.getItem("goals")) || [];
-    const completedGoals = goals.filter(goal => goal.completed).length;
-    const progress = (completedGoals / goals.length) * 100 || 0;
-    document.getElementById("progress-bar").style.width = `${progress}%`;
+  /* شريط التقدم */
+  .progress-bar-container {
+    width: 100%;
+    background-color: #3c3c3c;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 10px 0;
   }
   
-  // إعادة تحميل الأهداف
-  function refreshGoals() {
-    document.getElementById("goal-container").innerHTML = "";
-    loadGoals();
+  #progress-bar {
+    width: 0;
+    height: 10px;
+    background-color: #6d4e90;
+    transition: width 0.3s ease;
   }
   
-  // رسالة تحفيزية عند اكتمال الهدف
-  function showMotivationMessage() {
-    const messages = ["أحسنت! استمر!", "أنت في الطريق الصحيح!", "هدف جديد، نجاح جديد!"];
-    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    alert(randomMessage);
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
   }
   
-  // مشاركة التقدم
-  function shareProgress() {
-    const text = "أنجزت أهدافي اليوم على موقع تحفيز الأهداف!";
-    const url = "https://example.com";
-    window.open(`https://twitter.com/share?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`);
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border: 1px solid #3c3c3c;
+    border-radius: 8px;
+    background-color: #2a2a2a;
+    color: #f1f1f1;
   }
   
-  // إعداد تذكير يومي
-  function setDailyReminder(hour, minute) {
-    setInterval(() => {
-      const now = new Date();
-      if (now.getHours() === hour && now.getMinutes() === minute) {
-        alert("تذكير يومي: هل أكملت أهدافك اليوم؟");
-      }
-    }, 60000);
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #f1f1f1;
+    background-color: #bfa07a;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
   }
-  // إضافة التذكير اليومي بوقت محدد
-function setDailyReminder(hour, minute) {
-    setInterval(() => {
-        const now = new Date();
-        if (now.getHours() === hour && now.getMinutes() === minute) {
-            alert("تذكير يومي: هل أكملت أهدافك اليوم؟");
-        }
-    }, 60000); // تحقق كل دقيقة
+  
+  button:hover {
+    background-color: #a97e58;
+  }
+  
+  .goal-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    padding: 15px;
+    background-color: #393939;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+    color: #f1f1f1;
+    animation: slideIn 0.5s ease forwards;
+  }
+  
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  
+  .goal-item.completed {
+    text-decoration: line-through;
+    color: #a09e9e;
+  }
+  
+  button.complete-btn, button.delete-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+  
+  button.complete-btn {
+    background-color: #6d4e90;
+    color: #fff;
+  }
+  
+  button.complete-btn:hover {
+    background-color: #5a3c78;
+  }
+  
+  button.delete-btn {
+    background-color: #a54d4d;
+    color: #fff;
+  }
+  
+  button.delete-btn:hover {
+    background-color: #8b3b3b;
+  }
+  /* تنسيق عناصر واجهة المنبه */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #2f2f2f, #1e1e1e);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  color: #f1f1f1;
 }
 
-// إعداد التذكير ليكون الساعة 8 مساءً
-document.addEventListener("DOMContentLoaded", () => {
-    setDailyReminder(20, 0); // تذكير يومي عند الساعة 8:00 مساءً
-});
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(36, 36, 36, 0.9);
+  z-index: -1;
+}
+
+.content {
+  max-width: 450px;
+  width: 90%;
+  padding: 20px;
+  background-color: rgba(50, 50, 50, 0.85);
+  border-radius: 15px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+h1 {
+  font-size: 28px;
+  color: #bfa07a;
+  margin-bottom: 20px;
+}
+
+#goal-count {
+  font-size: 18px;
+  color: #bfa07a;
+  margin-bottom: 10px;
+}
+
+input[type="text"], input[type="time"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  border: 1px solid #3c3c3c;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  color: #f1f1f1;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #f1f1f1;
+  background-color: #bfa07a;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #a97e58;
+}
+
+.goal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  padding: 15px;
+  background-color: #393939;
+  border-radius: 8px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+  color: #f1f1f1;
+}
+
+  
