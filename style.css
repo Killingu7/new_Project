@@ -148,4 +148,88 @@ body {
   button.delete-btn:hover {
     background-color: #8b3b3b;
   }
+  /* تنسيق عناصر واجهة المنبه */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #2f2f2f, #1e1e1e);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  color: #f1f1f1;
+}
+
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(36, 36, 36, 0.9);
+  z-index: -1;
+}
+
+.content {
+  max-width: 450px;
+  width: 90%;
+  padding: 20px;
+  background-color: rgba(50, 50, 50, 0.85);
+  border-radius: 15px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+h1 {
+  font-size: 28px;
+  color: #bfa07a;
+  margin-bottom: 20px;
+}
+
+#goal-count {
+  font-size: 18px;
+  color: #bfa07a;
+  margin-bottom: 10px;
+}
+
+input[type="text"], input[type="time"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  border: 1px solid #3c3c3c;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  color: #f1f1f1;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #f1f1f1;
+  background-color: #bfa07a;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #a97e58;
+}
+
+.goal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  padding: 15px;
+  background-color: #393939;
+  border-radius: 8px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+  color: #f1f1f1;
+}
+
   
