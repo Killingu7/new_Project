@@ -1,235 +1,147 @@
-/* التصميم الأساسي */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #2f2f2f, #1e1e1e);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-    color: #f1f1f1;
-  }
-  
-  .background-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(145deg, rgba(36, 36, 36, 0.9), rgba(20, 20, 20, 0.7));
-    z-index: -1;
-  }
-  
-  .content {
-    max-width: 450px;
-    width: 90%;
-    padding: 20px;
-    background-color: rgba(50, 50, 50, 0.85);
-    border-radius: 15px;
-    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    animation: fadeIn 1s ease;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  h1 {
-    font-size: 28px;
-    color: #bfa07a;
-    margin-bottom: 20px;
-  }
-  
-  #goal-container {
-    margin-top: 15px;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-  
-  /* شريط التقدم */
-  .progress-bar-container {
-    width: 100%;
-    background-color: #3c3c3c;
-    border-radius: 5px;
-    overflow: hidden;
-    margin: 10px 0;
-  }
-  
-  #progress-bar {
-    width: 0;
-    height: 10px;
-    background-color: #6d4e90;
-    transition: width 0.3s ease;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-  }
-  
-  input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    font-size: 16px;
-    border: 1px solid #3c3c3c;
-    border-radius: 8px;
-    background-color: #2a2a2a;
-    color: #f1f1f1;
-  }
-  
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #f1f1f1;
-    background-color: #bfa07a;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #a97e58;
-  }
-  
-  .goal-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 10px 0;
-    padding: 15px;
-    background-color: #393939;
-    border-radius: 8px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
-    color: #f1f1f1;
-    animation: slideIn 0.5s ease forwards;
-  }
-  
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  .goal-item.completed {
-    text-decoration: line-through;
-    color: #a09e9e;
-  }
-  
-  button.complete-btn, button.delete-btn {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-  }
-  
-  button.complete-btn {
-    background-color: #6d4e90;
-    color: #fff;
-  }
-  
-  button.complete-btn:hover {
-    background-color: #5a3c78;
-  }
-  
-  button.delete-btn {
-    background-color: #a54d4d;
-    color: #fff;
-  }
-  
-  button.delete-btn:hover {
-    background-color: #8b3b3b;
-  }
-  /* تنسيق عناصر واجهة المنبه */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #2f2f2f, #1e1e1e);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  overflow: hidden;
-  color: #f1f1f1;
+document.addEventListener("DOMContentLoaded", () => {
+  loadGoals();
+  updateGoalCount();
+  setReminderCheckInterval();
+});
+
+// تحميل الأهداف من Local Storage
+function loadGoals() {
+  const goals = JSON.parse(localStorage.getItem("goals")) || [];
+  goals.forEach(goal => displayGoal(goal));
 }
 
-.background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(36, 36, 36, 0.9);
-  z-index: -1;
+// عرض الهدف
+function displayGoal(goal) {
+  const goalContainer = document.getElementById("goal-container");
+
+  const goalElement = document.createElement("div");
+  goalElement.className = `goal-item ${goal.completed ? 'completed' : ''}`;
+  goalElement.innerHTML = `
+    <span>${goal.title} - <small>${goal.reminder}</small></span>
+    <div>
+      <button onclick="completeGoal('${goal.title}')">اكتمال</button>
+      <button onclick="deleteGoal('${goal.title}')">حذف</button>
+    </div>
+  `;
+
+  goalContainer.appendChild(goalElement);
 }
 
-.content {
-  max-width: 450px;
-  width: 90%;
-  padding: 20px;
-  background-color: rgba(50, 50, 50, 0.85);
-  border-radius: 15px;
-  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
-  text-align: center;
+// إضافة هدف جديد
+document.getElementById("goal-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const title = document.getElementById("title").value.trim();
+  const reminderTime = document.getElementById("reminder-time").value;
+
+  if (!title || !reminderTime) return;
+
+  const goal = { title, reminder: reminderTime, completed: false };
+  saveGoal(goal);
+  displayGoal(goal);
+
+  document.getElementById("title").value = '';
+  document.getElementById("reminder-time").value = '';
+
+  updateGoalCount();
+});
+
+// حفظ الهدف
+function saveGoal(goal) {
+  const goals = JSON.parse(localStorage.getItem("goals")) || [];
+  goals.push(goal);
+  localStorage.setItem("goals", JSON.stringify(goals));
 }
 
-h1 {
-  font-size: 28px;
-  color: #bfa07a;
-  margin-bottom: 20px;
+// اكتمال الهدف
+function completeGoal(title) {
+  const goals = JSON.parse(localStorage.getItem("goals")) || [];
+  const updatedGoals = goals.map(goal =>
+    goal.title === title ? { ...goal, completed: !goal.completed } : goal
+  );
+  localStorage.setItem("goals", JSON.stringify(updatedGoals));
+  refreshGoals();
+  updateGoalCount();
 }
 
-#goal-count {
-  font-size: 18px;
-  color: #bfa07a;
-  margin-bottom: 10px;
+// حذف الهدف
+function deleteGoal(title) {
+  const goals = JSON.parse(localStorage.getItem("goals")) || [];
+  const updatedGoals = goals.filter(goal => goal.title !== title);
+  localStorage.setItem("goals", JSON.stringify(updatedGoals));
+  refreshGoals();
+  updateGoalCount();
 }
 
-input[type="text"], input[type="time"] {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  font-size: 16px;
-  border: 1px solid #3c3c3c;
-  border-radius: 8px;
-  background-color: #2a2a2a;
-  color: #f1f1f1;
+// إعادة تحميل الأهداف
+function refreshGoals() {
+  document.getElementById("goal-container").innerHTML = '';
+  loadGoals();
 }
 
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  color: #f1f1f1;
-  background-color: #bfa07a;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+// تحديث عدد الأهداف
+function updateGoalCount() {
+  const goals = JSON.parse(localStorage.getItem("goals")) || [];
+  const incompleteGoals = goals.filter(goal => !goal.completed).length;
+  document.getElementById("goal-number").textContent = incompleteGoals;
+}
+function notifyUser(message) {
+  if (Notification.permission === "granted") {
+    new Notification(message);
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        new Notification(message);
+      }
+    });
+  }
 }
 
-button:hover {
-  background-color: #a97e58;
+
+// التذكير بالأهداف
+function setReminderCheckInterval() {
+  setInterval(() => {
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const goals = JSON.parse(localStorage.getItem("goals")) || [];
+    goals.forEach(goal => {
+      if (!goal.completed && goal.reminder === currentTime) {
+        notifyUser(`تذكير: حان وقت الهدف "${goal.title}"!`);
+      }
+    });
+  }, 60000); // تحقق كل دقيقة
+}
+function scheduleReminder(goal) {
+  const now = new Date();
+  const [hours, minutes] = goal.reminder.split(':').map(Number);
+  const reminderTime = new Date();
+  reminderTime.setHours(hours, minutes, 0, 0);
+
+  const delay = reminderTime - now;
+  if (delay > 0) {
+    setTimeout(() => {
+      notifyUser(`تذكير: حان وقت الهدف "${goal.title}"!`);
+    }, delay);
+  }
 }
 
-.goal-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 10px 0;
-  padding: 15px;
-  background-color: #393939;
-  border-radius: 8px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
-  color: #f1f1f1;
+// جدولة لكل هدف
+function setGoalReminders() {
+  const goals = JSON.parse(localStorage.getItem("goals")) || [];
+  goals.forEach(goal => {
+    if (!goal.completed) {
+      scheduleReminder(goal);
+    }
+  });
 }
 
-  
+
+const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+});
+
+
